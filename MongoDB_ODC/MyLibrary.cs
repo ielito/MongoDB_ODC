@@ -25,12 +25,11 @@ namespace MongoDB_ODC
             return _mongoService.ValidateConnection();
         }
 
-        public List<string> GetCollectionDocuments(string collectionName)
+        public List<string> GetCollectionDocuments(string collectionName, string connectionString, string databaseName)
         {
-
             if (_mongoService == null)
             {
-                throw new InvalidOperationException("MongoService has not been initialized. Call ValidateConnection first.");
+                _mongoService = new MongoService(connectionString, databaseName);
             }
 
             var collection = _mongoService.GetCollection(collectionName);
