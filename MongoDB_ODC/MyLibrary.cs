@@ -1,63 +1,53 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using OutSystems.ExternalLibraries.SDK;
+using System;
 using System.Collections.Generic;
 
 namespace MongoDB_ODC
 {
     public class MyLibrary : IMongoDB
     {
-        private MongoService _mongoService;
-
         public MyLibrary()
         {
-
+            // Construtor público sem parâmetros
         }
 
-        public MyLibrary(string connectionString, string databaseName)
+        public MyLibrary(int value)
         {
-            _mongoService = new MongoService(connectionString, databaseName);
+            // Construtor com um parâmetro, se necessário
         }
 
+        [OSAction]
         public bool ValidateConnection(string connectionString, string databaseName)
         {
-            _mongoService = new MongoService(connectionString, databaseName);
-
-            return _mongoService.ValidateConnection();
+            var mongoService = new MongoService(connectionString, databaseName);
+            return mongoService.ValidateConnection();
         }
 
+        [OSAction]
         public List<string> GetCollectionDocuments(string collectionName, string connectionString, string databaseName)
         {
-            if (_mongoService == null)
+            var mongoService = new MongoService(connectionString, databaseName);
+
+            if (!mongoService.CollectionExists(collectionName))
             {
-                _mongoService = new MongoService(connectionString, databaseName);
+                throw new ApplicationException($"A coleção '{collectionName}' não existe no banco de dados '{databaseName}'.");
             }
 
-            var collection = _mongoService.GetCollection(collectionName);
+            var documentCount = mongoService.GetDocumentCount(collectionName);
+            if (documentCount == 0)
+            {
+                throw new ApplicationException($"A coleção '{collectionName}' está vazia.");
+            }
+
+            var collection = mongoService.GetCollection(collectionName);
             var bsonList = collection.Find(new BsonDocument()).ToList();
 
             var jsonList = new List<string>();
             foreach (var bson in bsonList)
             {
                 jsonList.Add(bson.ToJson());
-            }
-
-            return jsonList;
-        }
-
-        public List<string> GetPaginatedDocuments(string collectionName, int skip, int limit)
-        {
-            if (_mongoService == null)
-            {
-                throw new InvalidOperationException("MongoService has not been initialized. Call ValidateConnection first.");
-            }
-
-            var collection = _mongoService.GetCollection(collectionName);
-            var documents = collection.Find(new BsonDocument()).Skip(skip).Limit(limit).ToList();
-
-            var jsonList = new List<string>();
-            foreach (var doc in documents)
-            {
-                jsonList.Add(doc.ToJson());
             }
 
             return jsonList;

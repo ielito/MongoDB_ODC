@@ -32,5 +32,18 @@ namespace MongoDB_ODC
         {
             return _database.GetCollection<BsonDocument>(collectionName);
         }
+
+        public bool CollectionExists(string collectionName)
+        {
+            var filter = new BsonDocument("name", collectionName);
+            var collections = _database.ListCollections(new ListCollectionsOptions { Filter = filter });
+            return collections.Any();
+        }
+
+        public long GetDocumentCount(string collectionName)
+        {
+            var collection = GetCollection(collectionName);
+            return collection.CountDocuments(new BsonDocument());
+        }
     }
 }
