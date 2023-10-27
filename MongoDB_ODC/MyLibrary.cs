@@ -1,6 +1,8 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using OutSystems.ExternalLibraries.SDK;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
@@ -47,7 +49,10 @@ namespace MongoDB_ODC
             var jsonList = new List<string>();
             foreach (var bson in bsonList)
             {
-                jsonList.Add(bson.ToJson());
+                var json = bson.ToJson();
+                var parsedJson = JToken.Parse(json);
+                var formattedJson = parsedJson.ToString(Formatting.Indented);
+                jsonList.Add(formattedJson);
             }
 
             return jsonList;
