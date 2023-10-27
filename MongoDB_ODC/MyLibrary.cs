@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using MongoDB.Bson.IO;
 
 namespace MongoDB_ODC
 {
@@ -28,7 +29,7 @@ namespace MongoDB_ODC
         }
 
         [OSAction]
-        public List<string> GetCollectionDocuments(string collectionName, string connectionString, string databaseName)
+        public string GetCollectionDocuments(string collectionName, string connectionString, string databaseName)
         {
             var mongoService = new MongoService(connectionString, databaseName);
 
@@ -46,16 +47,11 @@ namespace MongoDB_ODC
             var collection = mongoService.GetCollection(collectionName);
             var bsonList = collection.Find(new BsonDocument()).ToList();
 
-            var jsonList = new List<string>();
-            foreach (var bson in bsonList)
-            {
-                var json = bson.ToJson();
-                var parsedJson = JToken.Parse(json);
-                var formattedJson = parsedJson.ToString(Formatting.Indented);
-                jsonList.Add(formattedJson);
-            }
+            var jsonArray = new BsonArray(bsonList);
+            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict }; // This line ensures ObjectId is serialized as a string
+            var json = jsonArray.ToJson(jsonWriterSettings);
 
-            return jsonList;
+            return json;
         }
     }
 }
