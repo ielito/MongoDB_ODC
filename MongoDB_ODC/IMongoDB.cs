@@ -7,6 +7,6 @@ namespace MongoDB_ODC
     public interface IMongoDB
     {
         bool ValidateConnection(string connectionString, string databaseName);
-        string GetCollectionDocuments(string collectionName, string connectionString, string databaseName);
+        string GetCollectionDocuments(string collectionName, string connectionString, string databaseName, int skip, int limit);
     }
 }

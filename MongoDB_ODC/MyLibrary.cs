@@ -29,7 +29,7 @@ namespace MongoDB_ODC
         }
 
         [OSAction]
-        public string GetCollectionDocuments(string collectionName, string connectionString, string databaseName)
+        public string GetCollectionDocuments(string collectionName, string connectionString, string databaseName, int skip, int limit)
         {
             var mongoService = new MongoService(connectionString, databaseName);
 
@@ -45,10 +45,10 @@ namespace MongoDB_ODC
             }
 
             var collection = mongoService.GetCollection(collectionName);
-            var bsonList = collection.Find(new BsonDocument()).ToList();
+            var bsonList = collection.Find(new BsonDocument()).Skip(skip).Limit(limit).ToList();
 
             var jsonArray = new BsonArray(bsonList);
-            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict }; // This line ensures ObjectId is serialized as a string
+            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
             var json = jsonArray.ToJson(jsonWriterSettings);
 
             return json;
